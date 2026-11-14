@@ -63,12 +63,15 @@ def calculateData():
     production = bananasminute/10
 
     # Hz - Frequency value calculation:
-    if production > energyrequest:
-        a = production - energyrequest
-        frequency = 50 + (random.uniform(-0.08, 0.08) * 0.04 * a)
-    elif production < energyrequest:
-        a = energyrequest - production
-        frequency = 50 - (random.uniform(-0.08, 0.08) * 0.08 * a)
+    imbalance = production - energyrequest
+    if imbalance < 0:
+        k = 0.08
+    else:
+        k = 0.04
+    target_freq = 50 + imbalance * k
+    target_freq = max(45, min(55, target_freq))
+    frequency += (target_freq - frequency) / 10
+    frequency += random.uniform(-0.02, 0.02)
 def menu():
     global bananasminute
     global coolingcores
@@ -98,15 +101,20 @@ def gameEmulator():
     global frequency
 
     print("Placeholder testing game emulator - you can see variables, and monitor code logic.")
-    print(f"Bananas per minute: {bananasminute}")
-    print(f"Cooling cores: {coolingcores}")
-    print(f"Temperature: {temperature+0.01:05.2f}")
-    print(f"Energy request: {energyrequest}")
-    print(f"Production: {production}")
-    print(f"Frequency: {frequency:05.2f}")
+    print("")
+    print(" Bananas/minute      Cooling cores       Temperature      Energy Request       Production          Frequency   ")
+    print("╒══════════════╕   ╒══════════════╕   ╒══════════════╕   ╒══════════════╕   ╒══════════════╕   ╒══════════════╕")
+    print(f"|{str(bananasminute).center(14)}|   |{str(coolingcores).center(14)}|   |{str(format(temperature, "05.2f")).center(14)}|   |{str(energyrequest).center(14)}|   |{str(production).center(14)}|   |{str(format(frequency, "05.2f")).center(14)}|")
+    print("╘══════════════╛   ╘══════════════╛   ╘══════════════╛   ╘══════════════╛   ╘══════════════╛   ╘══════════════╛   ")
+    #print(f"{bananasminute}")
+    #print(f"Cooling cores: {coolingcores}")
+    #print(f"Temperature: {temperature+0.01:05.2f}")
+    #print(f"Energy request: {energyrequest}")
+    #print(f"Production: {production}")
+    #print(f"Frequency: {frequency:05.2f}")
 
-DATA_LINES = 7
-data_row = 1
+DATA_LINES = 6
+data_row = 1 # Calculated in main
 
 def draw_loop():
     while True:
