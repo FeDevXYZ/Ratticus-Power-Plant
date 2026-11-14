@@ -19,7 +19,7 @@
               width: 98%;
               height: 98vh;">
     <img id="img" src="https://terra.hackclub.com/assets/sprites/npcs/sir-ratticus/grudging.webp" alt="Ratticus" style="height: 500px; width: 500px; object-fit: contain; z-index: 1; cursor: pointer">
-    <div style="cursor: pointer; width: 1000px; height: 150px; margin-bottom: 70px; margin-left: -250px; background: url('dialogue-box.svg'); background-size: contain; background-repeat: no-repeat; padding: 20px 200px 20px 200px; box-sizing: border-box; display: flex; align-items: center; justify-content: center;">
+    <div style="cursor: pointer; width: 1000px; height: 150px; margin-bottom: 70px; margin-left: -250px; background: url('/static/dialogue-box.svg'); background-size: contain; background-repeat: no-repeat; padding: 20px 200px 20px 200px; box-sizing: border-box; display: flex; align-items: center; justify-content: center;">
       <p id="text" style="color: black; font-size: 1.5em;">HEY PONCHO! TERRA'S TOWN IS OFFLINE, AND I NEED YOU TO FIX IT!!!</p>
     </div>
     <div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
@@ -115,6 +115,7 @@
         phase = phase += 1
       }
       else if(phase === 11) {
+        navigator.sendBeacon("/closed", "");
         window.close()
         body.style.background = "url('https://terra.hackclub.com/assets/loginscreen/landing-frame-4-q80.webp')"
         body.style.backgroundSize = "cover"
