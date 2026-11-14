@@ -98,9 +98,9 @@ def menu():
     global energyrequest_inputted
     global inputtimer
 
-    print("Placeholder testing menu")
-    print(" 1. Set bananas/minute  ")
-    print(" 2. Set cooling cores   ")
+    print("Placeholder testing menu              Change screens [not yet available]")
+    print(" 1. Set bananas/minute                  4. See storage")
+    print(" 2. Set cooling cores                   5. See city status")
     print(" 3. Set energy request  ")
     answer = input("Enter the option number: ")
     if answer == "1":
@@ -137,7 +137,7 @@ def gameEmulator():
     print(f"|{str(bananasminute).center(14)}|   |{str(coolingcores).center(14)}|   |{str(format(temperature, "05.2f")).center(14)}|   |{str(energyrequest).center(14)}|   |{str(production).center(14)}|   |{str(format(frequency, "05.2f")).center(14)}|")
     print("╘══════════════╛   ╘══════════════╛   ╘══════════════╛   ╘══════════════╛   ╘══════════════╛   ╘══════════════╛")
     if inputtimer > 0:
-        print(f"Changes will be applied in {inputtimer} seconds...")
+        print(f"Changes will be applied in {inputtimer:05.2f} seconds...")
     if inputtimer <= 0:
         print("")
     #print(f"{bananasminute}")
