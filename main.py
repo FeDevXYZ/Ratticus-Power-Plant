@@ -97,7 +97,7 @@ def menu():
     global energyrequest
     global energyrequest_inputted
     global inputtimer
-    print("")
+
     print("Placeholder testing menu")
     print(" 1. Set bananas/minute  ")
     print(" 2. Set cooling cores   ")
@@ -116,7 +116,7 @@ def menu():
         energyrequest_inputted = int(input("Enter value of energy request: "))
         inputtimer = 5
 
-DATA_LINES = 6
+DATA_LINES = 7
 data_row = 1 # Calculated in main
 
 def gameEmulator():
@@ -131,15 +131,15 @@ def gameEmulator():
 
     print("Placeholder testing game emulator - you can see variables, and monitor code logic.")
     print("")
-    if inputtimer > 0:
-        print(f"Changes will be applied in {inputtimer} seconds...")
-        DATA_LINES = 7
-    else:
-        DATA_LINES = 6
+
     print(" Bananas/minute      Cooling cores       Temperature      Energy Request       Production          Frequency   ")
     print("╒══════════════╕   ╒══════════════╕   ╒══════════════╕   ╒══════════════╕   ╒══════════════╕   ╒══════════════╕")
     print(f"|{str(bananasminute).center(14)}|   |{str(coolingcores).center(14)}|   |{str(format(temperature, "05.2f")).center(14)}|   |{str(energyrequest).center(14)}|   |{str(production).center(14)}|   |{str(format(frequency, "05.2f")).center(14)}|")
     print("╘══════════════╛   ╘══════════════╛   ╘══════════════╛   ╘══════════════╛   ╘══════════════╛   ╘══════════════╛")
+    if inputtimer > 0:
+        print(f"Changes will be applied in {inputtimer} seconds...")
+    if inputtimer <= 0:
+        print("")
     #print(f"{bananasminute}")
     #print(f"Cooling cores: {coolingcores}")
     #print(f"Temperature: {temperature+0.01:05.2f}")
@@ -165,7 +165,7 @@ if __name__ == '__main__':
     clear()
     pyfigure = pyfiglet.figlet_format("Ratticus Power Plant")
     input("Press ENTER to start your journey...")
-    # open_narrative("", webhandler.port)
+    open_narrative("", webhandler.port)
     clear()
     data_row = pyfigure.count("\n") + 2
     menu_row = data_row + DATA_LINES + 1
