@@ -73,7 +73,7 @@ def menu():
     global bananasminute
     global coolingcores
     global energyrequest
-
+    print("")
     print("Placeholder testing menu")
     print(" 1. Set bananas/minute  ")
     print(" 2. Set cooling cores   ")
