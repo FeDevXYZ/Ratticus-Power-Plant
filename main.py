@@ -14,9 +14,14 @@ os.system('')
 bananasminute = 250
 coolingcores = 0
 energyrequest = 0
+bananasminute_inputted = 250
+coolingcores_inputted = 0
+energyrequest_inputted = 0
 temperature = 0
 production = 0
 frequency = 50
+
+inputtimer = 0
 
 def clear():
     global pyfigure
@@ -37,11 +42,23 @@ def open_narrative(page, port):
 
 def calculateData():
     global bananasminute
+    global bananasminute_inputted
     global coolingcores
+    global coolingcores_inputted
     global production
     global energyrequest
+    global energyrequest_inputted
     global temperature
     global frequency
+
+    global inputtimer
+
+    if inputtimer == 0:
+        bananasminute = bananasminute_inputted
+        coolingcores = coolingcores_inputted
+        energyrequest = energyrequest_inputted
+    else:
+        inputtimer = inputtimer - 0.25
 
     # °C - Temperature calculation:
     if not 250 <= bananasminute <= 1500 :
@@ -74,8 +91,12 @@ def calculateData():
     frequency += random.uniform(-0.02, 0.02)
 def menu():
     global bananasminute
+    global bananasminute_inputted
     global coolingcores
+    global coolingcores_inputted
     global energyrequest
+    global energyrequest_inputted
+    global inputtimer
     print("")
     print("Placeholder testing menu")
     print(" 1. Set bananas/minute  ")
@@ -84,13 +105,19 @@ def menu():
     answer = input("Enter the option number: ")
     if answer == "1":
         print("min: 250b/m   |   max:  1500b/m")
-        bananasminute = int(input("Enter number of bananas/minute: "))
+        bananasminute_inputted = int(input("Enter number of bananas/minute: "))
+        inputtimer = 5
     elif answer == "2":
         print("max: 10    [one cooling core -> 7% cooling]")
-        coolingcores = int(input("Enter number of bananas/minute: "))
+        coolingcores_inputted = int(input("Enter number of bananas/minute: "))
+        inputtimer = 5
     elif answer == "3":
         print("min: 25MW   max: 150MW |  testing value - the real value will oscillate from 25MW to 150MW") # Se la richiesta è più alta della produzione, la frequenza scende e si verifica un blackout. Se richiesta < produzione di tanto, il giocatore viene penalizzato con un avviso
-        energyrequest = int(input("Enter value of energy request: "))
+        energyrequest_inputted = int(input("Enter value of energy request: "))
+        inputtimer = 5
+
+DATA_LINES = 6
+data_row = 1 # Calculated in main
 
 def gameEmulator():
     global bananasminute
@@ -99,23 +126,26 @@ def gameEmulator():
     global temperature
     global production
     global frequency
+    global inputtimer
+    global DATA_LINES
 
     print("Placeholder testing game emulator - you can see variables, and monitor code logic.")
     print("")
+    if inputtimer > 0:
+        print(f"Changes will be applied in {inputtimer} seconds...")
+        DATA_LINES = 7
+    else:
+        DATA_LINES = 6
     print(" Bananas/minute      Cooling cores       Temperature      Energy Request       Production          Frequency   ")
     print("╒══════════════╕   ╒══════════════╕   ╒══════════════╕   ╒══════════════╕   ╒══════════════╕   ╒══════════════╕")
     print(f"|{str(bananasminute).center(14)}|   |{str(coolingcores).center(14)}|   |{str(format(temperature, "05.2f")).center(14)}|   |{str(energyrequest).center(14)}|   |{str(production).center(14)}|   |{str(format(frequency, "05.2f")).center(14)}|")
-    print("╘══════════════╛   ╘══════════════╛   ╘══════════════╛   ╘══════════════╛   ╘══════════════╛   ╘══════════════╛   ")
+    print("╘══════════════╛   ╘══════════════╛   ╘══════════════╛   ╘══════════════╛   ╘══════════════╛   ╘══════════════╛")
     #print(f"{bananasminute}")
     #print(f"Cooling cores: {coolingcores}")
     #print(f"Temperature: {temperature+0.01:05.2f}")
     #print(f"Energy request: {energyrequest}")
     #print(f"Production: {production}")
     #print(f"Frequency: {frequency:05.2f}")
-
-DATA_LINES = 6
-data_row = 1 # Calculated in main
-
 def draw_loop():
     while True:
         calculateData()
@@ -128,8 +158,6 @@ def draw_loop():
         sys.stdout.write(f"\033[s\033[{data_row};1H{text}\033[u")
         sys.stdout.flush()
         time.sleep(0.25)
-
-# Press the green button in the gutter to run the script.
 
 if __name__ == '__main__':
     webhandler.webStarter()
