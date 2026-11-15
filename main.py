@@ -17,6 +17,7 @@ screen = 1
 comm_incoming = False
 commsmessage = "..."
 comm_cooldown = 0
+kaboom = False
 
 bananasminute = 250
 coolingcores = 0
@@ -33,11 +34,16 @@ kaboom_frequency = 999
 time_var = 0 # Midnight, 23:59 is expressed as 1439
 inputtimer = 0
 
+# Sys functions
 def clear():
     global pyfigure
 
     os.system('cls' if os.name == 'nt' else 'clear')
     print(pyfigure)
+def shutdown(message="", code=1):
+    sys.stdout.write("\033[J\n" + message + "\n")
+    sys.stdout.flush()
+    os._exit(code)
 
 def open_narrative(page, port):
     webhandler.page_closed = False
@@ -85,6 +91,10 @@ def checkComms():
     global comm_cooldown # Communication cooldown
 
     randomizecooldown = random.randint(1,3)
+    if kaboom_frequency == 3 or kaboom_temperature == 3:
+        comm_incoming = True
+        comm_cooldown = 20
+        commsmessage = "AAAAAAA WE'RE EXPLODING"
     if comm_cooldown < randomizecooldown:
         if temperature > 500:
             comm_incoming = True
@@ -97,11 +107,11 @@ def checkComms():
                     if randompick == 1:
                         commsmessage = f"PONCHO I AM LITERALLY BURNING ALIVE IN HERE YOU HAVE {kaboom_temperature} SECS UNTIL PERFECTION"
                     elif randompick == 2:
-                        commsmessage = f"PONCHO ITS {temperature} DEGREES IN HERE COOL THIS DOWN IN {kaboom_temperature} SECONDS"
+                        commsmessage = f"PONCHO ITS {int(temperature)} DEGREES IN HERE COOL THIS DOWN IN {kaboom_temperature} SECONDS"
                     elif randompick == 3:
                         commsmessage = f"I HOPE YOU LIKE COOKED RATS BECAUSE YOU'RE GOING TO FIND ME COOKED HERE IN {kaboom_temperature} SECONDS"
                     elif randompick == 4:
-                        commsmessage = f"PONCHO ANOTHER {kaboom_temperature} AND WE WILL BE COOKED. LITERALLY."
+                        commsmessage = f"PONCHO ANOTHER {kaboom_temperature} SECONDS AND WE WILL BE COOKED. LITERALLY."
                     elif randompick == 5:
                         commsmessage = "what a cool way to die: burned in a reactor MANAGED BY SOMEONE I SHOULDN'T HAVE GIVEN CONTROL."
             else:
@@ -196,7 +206,7 @@ def calculateData():
 
     # °C - Temperature calculation:
     if not 250 <= bananasminute <= 1500 :
-        raise SystemExit(f'Bananas/minute value not in range. {bananasminute}: should be from 250 to 1500.')
+        x = 0 # just something to continue
     elif bananasminute < 1250:
         target = (bananasminute / 200) * 192
         target = (target / 100) * (100 - (7 * coolingcores))
@@ -209,8 +219,9 @@ def calculateData():
         if temperature != target:
             raiseby = (target - temperature) / 10
             temperature = temperature + raiseby
-    if temperature > 560 and kaboom_temperature == 999:
-        kaboom_temperature = 60
+    if temperature > 560:
+        if kaboom_temperature == 999:
+            kaboom_temperature = 60
     else:
         kaboom_temperature = 999
 
@@ -233,8 +244,9 @@ def calculateData():
         target_freq = max(45, min(55, target_freq))
         frequency += (target_freq - frequency) / 10
         frequency += random.uniform(-0.02, 0.02)
-    if frequency < 48.55 or frequency > 51.55 and kaboom_frequency == 999:
-        kaboom_frequency = 60
+    if frequency < 48.55 or frequency > 51.55:
+        if kaboom_frequency == 999:
+            kaboom_frequency = 60
     else:
         kaboom_frequency = 999
 
@@ -253,6 +265,9 @@ def calculateData():
             kaboom_temperature = kaboom_temperature - 0.25
     checkComms()
 
+    if kaboom_temperature == 0 or kaboom_frequency == 0:
+        shutdown("KABOOOOOOM!!! I TOLD YA!", 1)
+
 def menu():
     global bananasminute
     global bananasminute_inputted
@@ -268,7 +283,7 @@ def menu():
         print(" 1. Set bananas/minute                  4. See storage")
         print(" 2. Set cooling cores                   5. See city status")
         print(" 3. Set energy request  ")
-    if screen == 2:
+    elif screen == 2:
         print("Placeholder testing menu              Change screens [not yet available]")
         print(" 1. Set bananas/minute                  4. See storage")
         print(" 2. Set cooling cores                   5. Go back to Control Room")
@@ -332,12 +347,12 @@ def gameEmulator():
         else:
             print("| Waiting for communications...")
             commsmessage = "..."
-        print("╒═══════════════════════════════════════════════════════════════════════╕")
-        print(f"| > {commsmessage.ljust(68)}|")
-        print("╘═══════════════════════════════════════════════════════════════════════╛")
+        print("╒══════════════════════════════════════════════════════════════════════════════════════════════════╕")
+        print(f"| > {commsmessage.ljust(98)}|")
+        print("╘═════════════════════════════════════════════════════════════════════════════════════════════╛")
 
     elif screen == 2:
-        print(" 1")
+        print(" 1            2           3           4           5")
         print("┌──────┐    ┌──────┐    ┌──────┐    ┌──────┐    ┌──────┐    ")
         print(f"|{str(format((energyrequest/10), "05.2f")).center(6)}|    |{str(format((energyrequest/10), "05.2f")).center(6)}|    |{str(format((energyrequest/10), "05.2f")).center(6)}|    |{str(format((energyrequest/10), "05.2f")).center(6)}|    |{str(format((energyrequest/10), "05.2f")).center(6)}|    ")
         print("└──────┘    └──────┘    └──────┘    └──────┘    └──────┘    ")
