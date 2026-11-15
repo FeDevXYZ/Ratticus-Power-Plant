@@ -1,6 +1,7 @@
 import time
 import os
 import webbrowser
+
 import webhandler
 import pyfiglet
 import random
@@ -10,6 +11,9 @@ import threading
 from contextlib import redirect_stdout
 pyfigure = ""
 os.system('')
+
+screen = 1
+
 
 bananasminute = 250
 coolingcores = 0
@@ -21,6 +25,7 @@ temperature = 0
 production = 0
 frequency = 50
 
+time_var = 0 # Midnight, 23:59 is expressed as 1439
 inputtimer = 0
 
 def clear():
@@ -40,6 +45,30 @@ def open_narrative(page, port):
 
     print("Pagina chiusa! Il gioco riprende.")
 
+# Daily energy request curve: (minute of the day, MW). Linear interpolation between points.
+# Plant limits: 25-150 MW. With 10 cooling cores the plant stays under 550°C up to ~142 MW.
+ENERGY_POINTS = [
+    (0, 40),      # 00:00
+    (300, 25),    # 05:00 night minimum
+    (420, 55),    # 07:00 morning ramp
+    (540, 75),    # 09:00
+    (660, 90),    # 11:00
+    (690, 110),   # 11:30 lunch peak
+    (750, 95),    # 12:30
+    (900, 85),    # 15:00
+    (1080, 100),  # 18:00
+    (1260, 135),  # 21:00 evening peak
+    (1380, 80),   # 23:00
+    (1440, 40),   # 24:00 = 00:00
+]
+
+def energy_request(t):
+    t = t % 1440
+    for (t0, v0), (t1, v1) in zip(ENERGY_POINTS, ENERGY_POINTS[1:]):
+        if t0 <= t <= t1:
+            return v0 + (v1 - v0) * (t - t0) / (t1 - t0)
+    return ENERGY_POINTS[0][1]
+
 def calculateData():
     global bananasminute
     global bananasminute_inputted
@@ -51,8 +80,16 @@ def calculateData():
     global temperature
     global frequency
 
+    global time_var
     global inputtimer
 
+    # Time calculation (from 0 to 1439)
+    if time_var < 1440:
+        time_var = time_var + 0.25
+    elif time_var == 1440:
+        time_var = 0
+
+    # INT - If an input is pending, make the timer tick
     if inputtimer == 0:
         bananasminute = bananasminute_inputted
         coolingcores = coolingcores_inputted
@@ -79,16 +116,22 @@ def calculateData():
     # MW - Production value calculation:
     production = bananasminute/10
 
+    # MW - Energy request value calculation:
+    energyrequest = round(energy_request(time_var), 1)
+
     # Hz - Frequency value calculation:
-    imbalance = production - energyrequest
-    if imbalance < 0:
-        k = 0.08
+    if bananasminute == 0 or bananasminute < 250:
+        frequency = 0
     else:
-        k = 0.04
-    target_freq = 50 + imbalance * k
-    target_freq = max(45, min(55, target_freq))
-    frequency += (target_freq - frequency) / 10
-    frequency += random.uniform(-0.02, 0.02)
+        imbalance = production - energyrequest
+        if imbalance < 0:
+            k = 0.08
+        else:
+            k = 0.04
+        target_freq = 50 + imbalance * k
+        target_freq = max(45, min(55, target_freq))
+        frequency += (target_freq - frequency) / 10
+        frequency += random.uniform(-0.02, 0.02)
 def menu():
     global bananasminute
     global bananasminute_inputted
@@ -97,11 +140,18 @@ def menu():
     global energyrequest
     global energyrequest_inputted
     global inputtimer
+    global screen
 
-    print("Placeholder testing menu              Change screens [not yet available]")
-    print(" 1. Set bananas/minute                  4. See storage")
-    print(" 2. Set cooling cores                   5. See city status")
-    print(" 3. Set energy request  ")
+    if screen == 1:
+        print("Placeholder testing menu              Change screens [not yet available]")
+        print(" 1. Set bananas/minute                  4. See storage")
+        print(" 2. Set cooling cores                   5. See city status")
+        print(" 3. Set energy request  ")
+    if screen == 2:
+        print("Placeholder testing menu              Change screens [not yet available]")
+        print(" 1. Set bananas/minute                  4. See storage")
+        print(" 2. Set cooling cores                   5. Go back to Control Room")
+        print(" 3. Set energy request  ")
     answer = input("Enter the option number: ")
     if answer == "1":
         print("min: 250b/m   |   max:  1500b/m")
@@ -115,7 +165,13 @@ def menu():
         print("min: 25MW   max: 150MW |  testing value - the real value will oscillate from 25MW to 150MW") # Se la richiesta è più alta della produzione, la frequenza scende e si verifica un blackout. Se richiesta < produzione di tanto, il giocatore viene penalizzato con un avviso
         energyrequest_inputted = int(input("Enter value of energy request: "))
         inputtimer = 5
-
+    elif answer == "4":
+        screen = 2
+    elif answer == "5":
+        if screen == 1:
+            screen = 2
+        elif screen == 2:
+            screen = 1
 DATA_LINES = 7
 data_row = 1 # Calculated in main
 
@@ -128,18 +184,25 @@ def gameEmulator():
     global frequency
     global inputtimer
     global DATA_LINES
+    global screen
 
     print("Placeholder testing game emulator - you can see variables, and monitor code logic.")
     print("")
+    if screen == 1:
+        print(" Bananas/minute      Cooling cores       Temperature      Energy Request       Production         Frequency                  Time    ")
+        print("╒══════════════╕   ╒══════════════╕   ╒══════════════╕   ╒══════════════╕   ╒══════════════╕   ╒══════════════╕            ┌───────┐ ")
+        print(f"|{str(bananasminute).center(14)}|   |{str(coolingcores).center(14)}|   |{str(format(temperature, "05.2f")).center(14)}|   |{str(energyrequest).center(14)}|   |{str(production).center(14)}|   |{str(format(frequency, "05.2f")).center(14)}|            |{str(str(format(int(int(time_var)/60), "02.0f"))+":"+str(format(time_var % 60, "02.0f"))).center(7)}|")
+        print("╘══════════════╛   ╘══════════════╛   ╘══════════════╛   ╘══════════════╛   ╘══════════════╛   ╘══════════════╛            └───────┘ ")
+        if inputtimer > 0:
+            print(f"Changes will be applied in {inputtimer:05.2f} seconds...")
+        if inputtimer <= 0:
+            print("") 
+    elif screen == 2:
+        print(" 1")
+        print("┌──────┐    ┌──────┐    ┌──────┐    ┌──────┐    ┌──────┐    ")
+        print(f"|{str(format((energyrequest/10), "05.2f")).center(6)}|    |{str(format((energyrequest/10), "05.2f")).center(6)}|    |{str(format((energyrequest/10), "05.2f")).center(6)}|    |{str(format((energyrequest/10), "05.2f")).center(6)}|    |{str(format((energyrequest/10), "05.2f")).center(6)}|    ")
+        print("└──────┘    └──────┘    └──────┘    └──────┘    └──────┘    ")
 
-    print(" Bananas/minute      Cooling cores       Temperature      Energy Request       Production          Frequency   ")
-    print("╒══════════════╕   ╒══════════════╕   ╒══════════════╕   ╒══════════════╕   ╒══════════════╕   ╒══════════════╕")
-    print(f"|{str(bananasminute).center(14)}|   |{str(coolingcores).center(14)}|   |{str(format(temperature, "05.2f")).center(14)}|   |{str(energyrequest).center(14)}|   |{str(production).center(14)}|   |{str(format(frequency, "05.2f")).center(14)}|")
-    print("╘══════════════╛   ╘══════════════╛   ╘══════════════╛   ╘══════════════╛   ╘══════════════╛   ╘══════════════╛")
-    if inputtimer > 0:
-        print(f"Changes will be applied in {inputtimer:05.2f} seconds...")
-    if inputtimer <= 0:
-        print("")
     #print(f"{bananasminute}")
     #print(f"Cooling cores: {coolingcores}")
     #print(f"Temperature: {temperature+0.01:05.2f}")
@@ -165,7 +228,7 @@ if __name__ == '__main__':
     clear()
     pyfigure = pyfiglet.figlet_format("Ratticus Power Plant")
     input("Press ENTER to start your journey...")
-    open_narrative("", webhandler.port)
+    # open_narrative("", webhandler.port)
     clear()
     data_row = pyfigure.count("\n") + 2
     menu_row = data_row + DATA_LINES + 1
