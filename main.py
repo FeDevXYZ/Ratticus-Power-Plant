@@ -18,6 +18,8 @@ comm_incoming = False
 commsmessage = "..."
 comm_cooldown = 0
 kaboom = False
+meltdown = "No"
+pericolo = ""
 
 bananasminute = 250
 coolingcores = 0
@@ -189,6 +191,8 @@ def calculateData():
     global comm_cooldown
     global kaboom_frequency
     global kaboom_temperature
+    global meltdown
+    global pericolo
 
     # Time calculation (from 0 to 1439)
     if time_var < 1440:
@@ -219,7 +223,7 @@ def calculateData():
         if temperature != target:
             raiseby = (target - temperature) / 10
             temperature = temperature + raiseby
-    if temperature > 560:
+    if (temperature > 560) or (temperature < 230):
         if kaboom_temperature == 999:
             kaboom_temperature = 60
     else:
@@ -263,9 +267,35 @@ def calculateData():
             x = 0  # just something to continue
         else:
             kaboom_temperature = kaboom_temperature - 0.25
+    # Give kaboom and warnings to gameEmulator
+    if kaboom_temperature > kaboom_frequency:
+        meltdown = str(format(kaboom_frequency, "05.2f"))+"s"
+    elif kaboom_temperature < kaboom_frequency:
+        meltdown = str(format(kaboom_temperature, "05.2f"))+"s"
+    elif kaboom_temperature == kaboom_frequency:
+        if (kaboom_temperature != 999) and (kaboom_frequency != 999):
+            meltdown = str(format(kaboom_temperature, "05.2f"))+"s"
+        else:
+            meltdown = "No"
+    pericolo = ""
+    if temperature > 550:
+        if (frequency > 50.55) or (frequency < 49.55):
+            pericolo = pericolo+"HIGH TEMP,"
+        else:
+            pericolo = pericolo+"HIGH TEMP"
+    elif temperature < 200:
+        if (frequency > 50.55) or (frequency < 49.55):
+            pericolo = pericolo+"LOW TEMP,"
+        else:
+            pericolo = pericolo+"LOW TEMP"
+    if frequency > 50.55:
+        pericolo = pericolo+" HIGH FREQUENCY"
+    elif frequency < 49.55:
+        pericolo = pericolo+" LOW FREQUENCY"
     checkComms()
 
     if kaboom_temperature == 0 or kaboom_frequency == 0:
+        meltdown = "NOW"
         shutdown("KABOOOOOOM!!! I TOLD YA!", 1)
 
 def menu():
@@ -327,6 +357,9 @@ def gameEmulator():
     global commsmessage
     global comm_cooldown
 
+    global pericolo
+    global meltdown
+
     print("Placeholder testing game emulator - you can see variables, and monitor code logic.")
     print("")
     if screen == 1:
@@ -343,13 +376,13 @@ def gameEmulator():
         if comm_cooldown == 10:
             comm_incoming = False
         if comm_incoming:
-            print("| Ratticus is sending a communication...")
+            print("| Ratticus is sending a communication...                                                              Warnings:                   Meltdown")
         else:
-            print("| Waiting for communications...")
+            print("| Waiting for communications...                                                                       Warnings:                   Meltdown")
             commsmessage = "..."
-        print("╒══════════════════════════════════════════════════════════════════════════════════════════════════╕")
-        print(f"| > {commsmessage.ljust(98)}|")
-        print("╘═════════════════════════════════════════════════════════════════════════════════════════════╛")
+        print("╒══════════════════════════════════════════════════════════════════════════════════════════════════╕ ╒══════════════════════════╕ ╒══════╕")
+        print(f"| > {commsmessage.ljust(95)}| |{pericolo.ljust(26)}| |{meltdown.center(6)}|")
+        print("╘══════════════════════════════════════════════════════════════════════════════════════════════════╛ ╘══════════════════════════╛ ╘══════╛")
 
     elif screen == 2:
         print(" 1            2           3           4           5")
@@ -382,7 +415,7 @@ if __name__ == '__main__':
     clear()
     pyfigure = pyfiglet.figlet_format("Ratticus Power Plant")
     input("Press ENTER to start your journey...")
-    # open_narrative("", webhandler.port)
+    open_narrative("", webhandler.port)
     clear()
     data_row = pyfigure.count("\n") + 2
     menu_row = data_row + DATA_LINES + 1
