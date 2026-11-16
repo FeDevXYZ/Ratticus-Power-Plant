@@ -8,6 +8,10 @@ At terminal game with browser-based story intro. You play as the operator of Ter
 
 ![GAME](docs/terminal.png)
 
+## Why and how I made it
+I made it because this week in Terra, Ratticus is starting a power plant powered by bananas! So i thought: "Why not make the power plant itself?" and RPP was born.
+I made it in Python and learned some Javascript in the meanwhile!
+
 ## How to play
 The game starts a short story in your browser, close the page and the game continues in the terminal. You have a live dashboard that shows the state of the plant, and a menu that lets you change parameters. Changes are applied after 2 seconds, so plan ahead.
 
